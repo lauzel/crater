@@ -1,7 +1,5 @@
 @if($estimate->user->billingaddress)
-    @if($estimate->user->billingaddress->name || $estimate->user->billingaddress->address_street_1 || $estimate->user->billingaddress->address_street_2 || $estimate->user->billingaddress->country || $estimate->user->billingaddress->state || $estimate->user->billingaddress->city || $estimate->user->billingaddress->zip || $estimate->user->billingaddress->phone)
-        <p class="bill-to">Bill To,</p>
-    @endif
+    <p class="bill-to">Bill To,</p>
     @if($estimate->user->billingaddress->name)
         <p class="bill-user-name">
             {{$estimate->user->billingaddress->name}}
@@ -16,12 +14,12 @@
             {{$estimate->user->billingaddress->address_street_2}}<br>
         @endif
 
-        @if($estimate->user->billingaddress->city && $estimate->user->billingaddress->city->name)
-            {{$estimate->user->billingaddress->city->name}},
+        @if($estimate->user->billingaddress->city)
+            {{$estimate->user->billingaddress->city}},
         @endif
 
-        @if($estimate->user->billingaddress->state && $estimate->user->billingaddress->state->name)
-            {{$estimate->user->billingaddress->state->name}}.
+        @if($estimate->user->billingaddress->state)
+            {{$estimate->user->billingaddress->state}}.
         @endif
 
         @if($estimate->user->billingaddress->zip)

@@ -58,8 +58,6 @@ class OnboardingController extends Controller
         $user = User::with([
             'addresses',
             'addresses.country',
-            'addresses.state',
-            'addresses.city',
             'company'
         ])->find(1);
 
@@ -99,6 +97,32 @@ class OnboardingController extends Controller
         ]);
     }
 
+    public function uploadAdminAvatar(Request $request)
+    {
+        $setting = Setting::getSetting('profile_complete');
+
+        if ($setting == '1' || $setting == 'COMPLETED') {
+            return response()->json(['error' => 'Profile already created.']);
+        }
+        $data = json_decode($request->admin_avatar);
+
+        if($data) {
+            $user = User::find($data->id);
+            if($user) {
+                $user->clearMediaCollection('admin_avatar');
+
+                $user->addMediaFromBase64($data->data)
+                    ->usingFileName($data->name)
+                    ->toMediaCollection('admin_avatar');
+            }
+        }
+
+        return response()->json([
+            'user' => $user,
+            'success' => true
+        ]);
+    }
+
     public function adminCompany(CompanyRequest $request)
     {
         $setting = Setting::getSetting('profile_complete');
@@ -130,8 +154,8 @@ class OnboardingController extends Controller
         $fields = $request->only([
             'address_street_1',
             'address_street_2',
-            'city_id',
-            'state_id',
+            'city',
+            'state',
             'country_id',
             'zip',
             'phone'
@@ -178,6 +202,45 @@ class OnboardingController extends Controller
             );
         }
 
+        $invoices = [
+            'invoice_auto_generate' => 'YES',
+            'invoice_prefix' => 'INV'
+        ];
+
+        foreach ($invoices as $key => $value) {
+            CompanySetting::setSetting(
+                $key,
+                $value,
+                $user->company_id
+            );
+        }
+
+        $estimates = [
+            'estimate_prefix' => 'EST',
+            'estimate_auto_generate' => 'YES'
+        ];
+
+        foreach ($estimates as $key => $value) {
+            CompanySetting::setSetting(
+                $key,
+                $value,
+                $user->company_id
+            );
+        }
+
+        $payments = [
+            'payment_prefix' => 'PAY',
+            'payment_auto_generate' => 'YES'
+        ];
+
+        foreach ($payments as $key => $value) {
+            CompanySetting::setSetting(
+                $key,
+                $value,
+                $user->company_id
+            );
+        }
+
         $colors = [
             'primary_text_color' => '#5851D8',
             'heading_text_color' => '#595959',
@@ -214,7 +277,14 @@ class OnboardingController extends Controller
 
         if (file_exists($path)) {
             file_put_contents($path, str_replace(
-                'PROXY_OAUTH_CLIENT_SECRET='.config('auth.proxy.client_secret'), 'PROXY_OAUTH_CLIENT_SECRET='.$client->secret, file_get_contents($path)
+                'PROXY_OAUTH_CLIENT_SECRET='.config('auth.proxy.client_secret'),
+                'PROXY_OAUTH_CLIENT_SECRET='.$client->secret,
+                file_get_contents($path)
+            ));
+            file_put_contents($path, str_replace(
+                'APP_DEBUG=true',
+                'APP_DEBUG=false',
+                file_get_contents($path)
             ));
         }
 

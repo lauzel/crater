@@ -46,16 +46,6 @@ Route::get('/countries', [
     'uses' => 'LocationController@getCountries'
 ]);
 
-Route::get('/states/{id}', [
-    'as' => 'states',
-    'uses' => 'LocationController@getStates'
-]);
-
-Route::get('/cities/{id}', [
-    'as' => 'cities',
-    'uses' => 'LocationController@getCities'
-]);
-
 
 // Onboarding
 //----------------------------------
@@ -94,6 +84,11 @@ Route::group(['middleware' => 'redirect-if-installed'], function () {
     Route::post('/admin/onboarding/profile', [
         'as' => 'admin.profile',
         'uses' => 'OnboardingController@adminProfile'
+    ]);
+
+    Route::post('/admin/profile/upload-avatar', [
+        'as' => 'admin.on_boarding.avatar',
+        'uses' => 'OnboardingController@uploadAdminAvatar'
     ]);
 
     Route::post('/admin/onboarding/company', [
@@ -308,6 +303,11 @@ Route::group(['middleware' => 'api'], function () {
                 'uses' => 'CompanyController@updateAdminProfile'
             ]);
 
+            Route::post('/profile/upload-avatar', [
+                'as' => 'admin.profile.avatar',
+                'uses' => 'CompanyController@uploadAdminAvatar'
+            ]);
+
             Route::post('/company/upload-logo', [
                 'as' => 'upload.admin.company.logo',
                 'uses' => 'CompanyController@uploadCompanyLogo'
@@ -346,6 +346,16 @@ Route::group(['middleware' => 'api'], function () {
             Route::put('/update-setting', [
                 'as' => 'admin.update.setting',
                 'uses' => 'CompanyController@updateSetting'
+            ]);
+
+            Route::get('/get-customize-setting', [
+                'as' => 'admin.get.customize.setting',
+                'uses' => 'CompanyController@getCustomizeSetting'
+            ]);
+
+            Route::put('/update-customize-setting', [
+                'as' => 'admin.update.customize.setting',
+                'uses' => 'CompanyController@updateCustomizeSetting'
             ]);
 
             Route::get('/environment/mail', [

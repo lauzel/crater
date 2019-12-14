@@ -56,7 +56,7 @@ class CompanyController extends Controller
 
     public function getAdminCompany()
     {
-        $user = User::with(['addresses', 'addresses.country', 'addresses.state', 'addresses.city', 'company'])->find(1);
+        $user = User::with(['addresses', 'addresses.country', 'company'])->find(1);
 
         return response()->json([
             'user' => $user
@@ -75,9 +75,9 @@ class CompanyController extends Controller
             $company->addMediaFromRequest('logo')->toMediaCollection('logo');
         }
 
-        $fields = $request->only(['address_street_1', 'address_street_2', 'city_id', 'state_id', 'country_id', 'zip', 'phone']);
+        $fields = $request->only(['address_street_1', 'address_street_2', 'city', 'state', 'country_id', 'zip', 'phone']);
         $address = Address::updateOrCreate(['user_id' => 1], $fields);
-        $user = User::with(['addresses', 'addresses.country', 'addresses.state', 'addresses.city', 'company'])->find(1);
+        $user = User::with(['addresses', 'addresses.country', 'company'])->find(1);
 
         return response()->json([
             'user' => $user,
@@ -143,6 +143,58 @@ class CompanyController extends Controller
             'fiscal_year',
             'moment_date_format'
         ];
+
+        foreach ($sets as $key) {
+            CompanySetting::setSetting($key, $request->$key, $request->header('company'));
+        }
+
+        return response()->json([
+            'success' => true
+        ]);
+    }
+
+    public function getCustomizeSetting (Request $request)
+    {
+        $invoice_prefix = CompanySetting::getSetting('invoice_prefix', $request->header('company'));
+        $invoice_auto_generate = CompanySetting::getSetting('invoice_auto_generate', $request->header('company'));
+
+        $estimate_prefix = CompanySetting::getSetting('estimate_prefix', $request->header('company'));
+        $estimate_auto_generate  = CompanySetting::getSetting('estimate_auto_generate', $request->header('company'));
+
+        $payment_prefix = CompanySetting::getSetting('payment_prefix', $request->header('company'));
+        $payment_auto_generate = CompanySetting::getSetting('payment_auto_generate', $request->header('company'));
+
+        return  response()->json([
+            'invoice_prefix' => $invoice_prefix,
+            'invoice_auto_generate' => $invoice_auto_generate,
+            'estimate_prefix' => $estimate_prefix,
+            'estimate_auto_generate' => $estimate_auto_generate,
+            'payment_prefix' => $payment_prefix,
+            'payment_auto_generate' => $payment_auto_generate,
+        ]);
+    }
+
+    public function updateCustomizeSetting (Request $request)
+    {
+        $sets = [];
+
+        if ($request->type == "PAYMENTS") {
+            $sets = [
+                'payment_prefix'
+            ];
+        }
+
+        if ($request->type == "INVOICES") {
+            $sets = [
+                'invoice_prefix',
+            ];
+        }
+
+        if ($request->type == "ESTIMATES") {
+            $sets = [
+                'estimate_prefix',
+            ];
+        }
 
         foreach ($sets as $key) {
             CompanySetting::setSetting($key, $request->$key, $request->header('company'));
@@ -224,6 +276,34 @@ class CompanyController extends Controller
         }
 
         return response()->json([
+            'success' => true
+        ]);
+    }
+
+    /**
+     * Upload the Admin Avatar to public storage.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function uploadAdminAvatar(Request $request)
+    {
+        $data = json_decode($request->admin_avatar);
+
+        if($data) {
+            $user = auth()->user();
+
+            if($user) {
+                $user->clearMediaCollection('admin_avatar');
+
+                $user->addMediaFromBase64($data->data)
+                    ->usingFileName($data->name)
+                    ->toMediaCollection('admin_avatar');
+            }
+        }
+
+        return response()->json([
+            'user' => $user,
             'success' => true
         ]);
     }

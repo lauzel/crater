@@ -5,6 +5,11 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Crater\Events\UpdateFinished;
+use Crater\Listeners\Updates\v1\Version110;
+use Crater\Listeners\Updates\v2\Version200;
+use Crater\Listeners\Updates\v2\Version201;
+use Crater\Listeners\Updates\v2\Version202;
+use Crater\Listeners\Updates\v2\Version210;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -15,6 +20,11 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         UpdateFinished::class=> [
+            Version110::class,
+            Version200::class,
+            Version201::class,
+            Version202::class,
+            Version210::class,
         ],
         Registered::class => [
             SendEmailVerificationNotification::class,
