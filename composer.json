@@ -69,7 +69,8 @@
             "chmod 775 storage/logs", 
             "chmod 775 storage/framework", 
             "chmod 775 bootstrap/cache",
-            "php artisan passport:keys"
+            "php artisan passport:keys",
+            "touch .env"
         ]
     },
     "config": {
