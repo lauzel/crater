@@ -54,7 +54,7 @@ class EnvironmentManager
 
             if(\Schema::hasTable('users') ) {
                 return [
-                    'error' => 'database_should_be_empty'
+                    'error' => 'database_should_be_empty',
                 ];
             }
 
@@ -81,7 +81,8 @@ class EnvironmentManager
 
         } catch (Exception $e) {
             return [
-                'error' => 'database_variables_save_error'
+                'error' => 'database_variables_save_error',
+                'exception' => $e->getMessage()
             ];
         }
 
